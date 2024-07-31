@@ -1,10 +1,10 @@
 /*********************************************************************************
-*  WEB322 – Assignment 04
+*  WEB322 – Assignment 05
 *  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part 
 *  of this assignment has been copied manually or electronically from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
-*  Name: Larry Okuonghae Student ID: 145203238 Date: 07/16/2024
+*  Name: Larry Okuonghae Student ID: 145203238 Date: 07/31/2024
 *
 *  Vercel Web App URL: https://web322-app-six-umber.vercel.app/
 * 
@@ -38,6 +38,12 @@ const hbs = exphbs.create({
             } else {
                 return options.fn(this);
             }
+        },
+        formatDate: function(dateObj){
+            let year = dateObj.getFullYear();
+            let month = (dateObj.getMonth() + 1).toString();
+            let day = dateObj.getDate().toString();
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2,'0')}`;
         }
     }
 });
@@ -172,37 +178,24 @@ res.render("shop", {data: viewData})
 });
  
 // Route to get all items
-app.get('/items', (req, res) => {
-    if (req.query.category) {
-        storeService.getItemsByCategory(req.query.category).then((items) => {
-            if (items.length > 0) {
-                res.render('items', { items: items });
-            } else {
-                res.render('items', { message: "No items found" });
-            }
-        }).catch((err) => {
-            res.render('items', { message: "No results" });
-        });
-    } else if (req.query.minDate) {
-        storeService.getItemsByMinDate(req.query.minDate).then((items) => {
-            if (items.length > 0) {
-                res.render('items', { items: items });
-            } else {
-                res.render('items', { message: "No items found" });
-            }
-        }).catch((err) => {
-            res.render('items', { message: "No results" });
-        });
-    } else {
-        storeService.getAllItems().then((items) => {
-            if (items.length > 0) {
-                res.render('items', { items: items });
-            } else {
-                res.render('items', { message: "No items found" });
-            }
-        }).catch((err) => {
-            res.render('items', { message: "No results" });
-        });
+app.get('/items', async (req, res) => {
+    try {
+        let items;
+        if (req.query.category) {
+            items = await storeService.getItemsByCategory(req.query.category);
+        } else if (req.query.minDate) {
+            items = await storeService.getItemsByMinDate(req.query.minDate);
+        } else {
+            items = await storeService.getAllItems();
+        }
+
+        if (items.length > 0) {
+            res.render('items', { items: items });
+        } else {
+            res.render('items', { message: "No items found" });
+        }
+    } catch (err) {
+        res.render('items', { message: "No results" });
     }
 });
 
@@ -215,19 +208,28 @@ app.get('/item/:id', (req, res) => {
 });
  
 // Route to get all categories
-app.get('/categories', (req, res) => {
-   storeService.getCategories()
-       .then((data) =>{ 
-            res.render('categories', { categories: data });
-        })
-       .catch((err) =>{ 
-        res.render('categories', { message: "No categories found" });
-       })
+app.get('/categories', async (req, res) => {
+    try {
+        const categories = await storeService.getCategories();
+        if (categories.length > 0) {
+            res.render('categories', { categories: categories });
+        } else {
+            res.render('categories', { message: "No categories found" });
+        }
+    } catch (err) {
+        res.render('categories', { message: "No results" });
+    }
 });
 
-//Serve the addItem.html file
+// Route to render the add item page with categories
 app.get('/items/add', (req, res) => {
-   res.render('addItem');
+    storeService.getCategories() // Fetch categories
+        .then((categories) => {
+            res.render('addItem', { categories });
+        })
+        .catch(() => {
+            res.render('addItem', { categories: [] }); // In case of an error, render with an empty categories array
+        });
 });
 
 app.post('/items/add', upload.single('featureImage'), (req, res) => {
@@ -272,7 +274,42 @@ app.post('/items/add', upload.single('featureImage'), (req, res) => {
   }
 });
 
- 
+// GET route to render add category form
+app.get('/categories/add', (req, res) => {
+    res.render('addCategory');
+});
+
+// POST route to handle add category form submission
+app.post('/categories/add', (req, res) => {
+    storeService.addCategory(req.body).then(() => {
+        res.redirect('/categories');
+    }).catch((err) => {
+        res.status(500).send(err.message);
+    });
+});
+
+// GET route to delete a category by ID
+app.get('/categories/delete/:id', (req, res) => {
+    storeService.deleteCategoryById(req.params.id)
+        .then(() => res.redirect('/categories'))
+        .catch(() => res.status(500).send("Unable to Remove Category / Category not found"));
+});
+
+// Route to delete an item by ID
+app.get('/items/delete/:id', (req, res) => {
+    const itemId = req.params.id;
+
+    storeService.deleteItemById(itemId)
+        .then(() => {
+            res.redirect('/items'); // Redirect to items list
+        })
+        .catch(() => {
+            res.status(500).send("Unable to Remove Item / Item not found"); // Error handling
+        });
+});
+
+
+
 // Handle 404 - Page Not Found
 app.use((req, res) => {
    res.status(404).render('404');
@@ -280,6 +317,7 @@ app.use((req, res) => {
  
 
 // Initialize store-service and start the server
+console.log("Initializing store service...");
 storeService.initialize()
    .then(() => {
       const PORT = process.env.PORT || 8080;
