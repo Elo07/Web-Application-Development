@@ -257,4 +257,6 @@ module.exports = {
   getItemById,
   getPublishedItemsByCategory,
   addCatergory,
-  deleteCa
+  deleteCategoryById,
+  deleteItemById
+};
