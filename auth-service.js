@@ -71,6 +71,9 @@ module.exports.checkUser = function (userData) {
           return reject(`Unable to find user: ${userData.userName}`);
         }
 
+        // Assuming users[0] is the user object we want
+        const user = users[0];
+        
         // Compare hashed password with the provided password
         bcrypt
           .compare(userData.password, users[0].password)
@@ -82,7 +85,6 @@ module.exports.checkUser = function (userData) {
             }
 
             // Update loginHistory and resolve
-            let user = users[0];
             user.loginHistory.push({
               dateTime: new Date().toString(),
               userAgent: userData.userAgent,
