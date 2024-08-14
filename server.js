@@ -353,9 +353,8 @@ app.post("/register", async (req, res) => {
   // Debug log to check the incoming request body
   console.log("Request body:", req.body);
 
-  // Ensure req.body is defined and has the necessary properties
-  const userName = req.body ? req.body.userName : '';
-
+  // Destructure userName and password from req.body, default to empty strings
+  const { userName = '', password = '' } = req.body || {};
   try {
     // Attempt to register the user
     await authData.registerUser(req.body);
