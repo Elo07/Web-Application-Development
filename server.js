@@ -29,6 +29,12 @@ const authData = require("./auth-service");
 const HTTP_PORT = process.env.PORT || 8080;
 const clientSessions = require("client-sessions");
 
+// Middleware to parse JSON request bodies
+app.use(express.json());
+
+// Middleware to parse URL-encoded request bodies (for form submissions)
+app.use(express.urlencoded({ extended: true }));
+
 // Handlebars helpers
 const hbs = exphbs.create({
   extname: ".hbs",
@@ -350,9 +356,33 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  authData.registerUser(req.body)
-    .then(() => res.render('register', { successMsg: "User created!"}))
-    .catch((err) => res.render('register', { errorMsg: err, userName: req.body.userName }));
+  // Debug log to check the incoming request body
+  console.log("Request body:", req.body);
+
+  // Ensure req.body is defined and has the necessary properties
+  if (!req.body || !req.body.userName || !req.body.password) {
+    return res.status(400).render("register", { 
+      errorMessage: "Both userName and password are required", 
+      userName: req.body ? req.body.userName : '' 
+    });
+  }
+
+  const { userName, password } = req.body;
+
+  try {
+    // Attempt to register the user
+    await authData.registerUser(req.body);
+
+    // Render the success message if registration is successful
+    res.render("register", { successMessage: "User created", userName });
+  } catch (err) {
+    // Log the error and render the registration page with error message
+    console.error("Registration error:", err);
+    res.render("register", { 
+      errorMessage: err.message || 'An error occurred', 
+      userName 
+    });
+  }
 });
 
 
