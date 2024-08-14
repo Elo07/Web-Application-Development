@@ -349,15 +349,25 @@ app.get("/register", (req, res) => {
   }
 });
 
-// Route to handle user registration
 app.post("/register", async (req, res) => {
+  // Debug log to check the incoming request body
+  console.log("Request body:", req.body);
+
+  // Ensure req.body is defined and has the necessary properties
+  const userName = req.body ? req.body.userName : '';
+
   try {
+    // Attempt to register the user
     await authData.registerUser(req.body);
+    // Render the success message if registration is successful
     res.render("register", { successMessage: "User created" });
   } catch (err) {
-    res.render("register", { errorMessage: err, userName: req.body.userName });
+    // Log the error and render the registration page with error message
+    console.error("Registration error:", err);
+    res.render("register", { errorMessage: err.message || 'An error occurred', userName });
   }
 });
+
 
 // Route to handle user login
 app.post("/login", async (req, res) => {
