@@ -30,7 +30,7 @@ const HTTP_PORT = process.env.PORT || 8080;
 const clientSessions = require("client-sessions");
 
 // Middleware to parse JSON request bodies
-app.use(express.json());
+//app.use(express.json());
 
 // Middleware to parse URL-encoded request bodies (for form submissions)
 app.use(express.urlencoded({ extended: true }));
