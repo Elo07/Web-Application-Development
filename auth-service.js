@@ -18,7 +18,7 @@ let User;
 
 module.exports.initialize = function () {
   return new Promise(function (resolve, reject) {
-    let db = mongoose.createConnection('mongodb+srv://okuonghaelarry:QpgtsTkDD1LAPmd8@cluster0.lvz98.mongodb.net/cluster0?retryWrites=true&w=majority&appName=Cluster0');
+    let db = mongoose.createConnection('mongodb+srv://LarryOkuonghae:BBd2kLANESU7W0aH@clintsCluster.lvz98.mongodb.net/clintsCluster?retryWrites=true&w=majority&appName=clintsCluster');
 
     db.on("error", (err) => {
       reject(err); // reject the promise with the provided error
