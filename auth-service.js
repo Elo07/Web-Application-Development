@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+require("dotenv").config(); // Load environment variables
 
 const userSchema = new Schema({
   userName: { type: String, unique: true },
@@ -18,7 +19,8 @@ let User;
 
 module.exports.initialize = function () {
   return new Promise(function (resolve, reject) {
-    let db = mongoose.createConnection('mongodb+srv://LarryOkuonghae:BBd2kLANESU7W0aH@clintsCluster.lvz98.mongodb.net/clintsCluster?retryWrites=true&w=majority&appName=clintsCluster');
+    // Use the environment variable for the MongoDB URI
+    const db = mongoose.createConnection(process.env.MONGO_URI);
 
     db.on("error", (err) => {
       reject(err); // reject the promise with the provided error
