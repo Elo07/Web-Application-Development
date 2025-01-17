@@ -24,11 +24,15 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 const exphbs = require("express-handlebars");
+require('dotenv').config();
 const mongoose = require("mongoose");
 const authData = require("./auth-service");
 const HTTP_PORT = process.env.PORT || 8080;
 const clientSessions = require("client-sessions");
 
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Database connected successfully'))
+  .catch(err => console.error('Database connection error:', err));
 
 // Middleware to parse URL-encoded request bodies (for form submissions)
 app.use(express.urlencoded({ extended: true }));
