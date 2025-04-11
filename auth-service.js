@@ -21,7 +21,7 @@ let User;
 module.exports.initialize = function () {
   return new Promise(function (resolve, reject) {
     // Use the environment variable for the MongoDB URI
-    const uri = 'mongodb+srv://LarryOkuonghae:BBd2kLANESU7W0aH@clintsCluster.lvz98.mongodb.net/clintsCluster?retryWrites=true&w=majority&appName=clintsCluster';
+    const uri = 'mongodb+srv://LarryOkuonghae:pfYkwLDEqCLOO6Eo@clintscluster.lvz98.mongodb.net/clintsCluster?retryWrites=true&w=majority&appName=clintsCluster';
     const db = mongoose.createConnection(uri);
 
     db.on("error", (err) => {
